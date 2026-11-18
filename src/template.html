@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>上海数学 · 知识点图谱（小学 → 初中）· 沪教版</title>
+<style>
+  :root {
+    --algebra: #35c7f0;
+    --trig: #a78bfa;
+    --geometry: #f59a26;
+    --stat: #34d399;
+    --ink: #e8f1ff;
+    --muted: #7f95b8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body {
+    background:
+      radial-gradient(1200px 700px at 22% -8%, #0e2144 0%, transparent 60%),
+      radial-gradient(900px 600px at 82% 108%, #10243a 0%, transparent 62%),
+      #03060e;
+    color: var(--ink);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  #scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: grab;
+           transform: translateZ(0); }
+  #label-layer { position: fixed; inset: 0; pointer-events: none; z-index: 3; }
+  .mlabel {
+    position: absolute; left: 0; top: 0; white-space: nowrap;
+    font-size: 13px; font-weight: 500; letter-spacing: .2px; color: #eef6ff;
+    padding: 3px 8px; border-radius: 7px; background: rgba(4,9,18,.8);
+    box-shadow: 0 1px 6px rgba(0,0,0,.5);
+  }
+  .mlabel.compact { font-size: 14px; font-weight: 600; padding: 3px 9px; }
+  .mlabel.mastered::before { content: '✓ '; color: #ffd070; }
+  .mlabel.mastered { color: #ffe8b8; }
+  #progress {
+    font-size: 12px; color: #6f88ad; margin-bottom: 12px; letter-spacing: .3px;
+  }
+  #progress.has { color: #ffd070; }
+  .mark-btn {
+    display: block; width: 100%; margin-bottom: 14px; padding: 9px 12px;
+    font: 12px/1.2 system-ui; color: #9fd0ff; text-align: left; cursor: pointer;
+    background: rgba(40,90,150,.16); border: 1px solid rgba(90,160,240,.28); border-radius: 10px;
+  }
+  .mark-btn:hover { background: rgba(60,130,220,.24); }
+  .mark-btn.on { color: #ffd070; background: rgba(120,90,20,.2); border-color: rgba(255,208,112,.45); }
+  .tlabel.stage-split {
+    background: rgba(10,26,44,.9); border: 1px solid rgba(120,200,255,.25);
+    color: #9fd0ff; font-size: 12px; letter-spacing: 2px; padding: 5px 16px;
+  }
+  .tlabel {
+    position: absolute; left: 0; top: 0; white-space: nowrap;
+    font-size: 13px; font-weight: 700; color: #bcd9f5;
+    padding: 2px 7px; border-radius: 6px; background: rgba(8,18,32,.7);
+  }
+
+  /* ---------- 顶部 HUD ---------- */
+  #hud {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 22px 28px; pointer-events: none; z-index: 5;
+  }
+  .brand { display: flex; gap: 14px; align-items: center; }
+  .brand .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--algebra);
+    box-shadow: 0 0 18px 4px rgba(53,199,240,.7);
+  }
+  .brand h1 {
+    margin: 0; font-size: 19px; font-weight: 650; letter-spacing: .3px;
+    background: linear-gradient(92deg, #eaf6ff 0%, #9fd8ff 55%, #7ea8ff 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .brand p { margin: 3px 0 0; font-size: 12px; color: var(--muted); letter-spacing: .2px; }
+
+  .right { display: flex; gap: 9px; align-items: center; pointer-events: auto; }
+  .pill {
+    font-size: 11px; letter-spacing: .4px; padding: 5px 11px; border-radius: 999px;
+    background: rgba(53,199,240,.12); border: 1px solid rgba(53,199,240,.38); color: #9fe4ff;
+  }
+  /* 技术状态标签默认藏起来（需要排查时用 ?debug=1 打开） */
+  #gl-tag, #fps, #beat { display: none; }
+  body.debug #gl-tag, body.debug #fps, body.debug #beat { display: inline-flex; }
+  .seg { display: inline-flex; border: 1px solid rgba(110,170,240,.2); border-radius: 999px; overflow: hidden; }
+  .seg button {
+    font: 12px/1 system-ui; color: #8fb4d8; background: transparent; border: 0; padding: 7px 12px; cursor: pointer;
+  }
+  .seg button.on { background: rgba(90,170,250,.22); color: #dff1ff; }
+  .seg button:hover { background: rgba(90,170,250,.12); }
+  .btn {
+    font-size: 12px; padding: 6px 13px; border-radius: 999px; cursor: pointer;
+    background: rgba(255,255,255,.05); border: 1px solid rgba(150,190,240,.22); color: #cfe0f8;
+    transition: .18s;
+  }
+  .btn:hover { background: rgba(120,180,255,.16); border-color: rgba(140,200,255,.5); }
+  .btn.on { background: rgba(53,199,240,.18); border-color: rgba(53,199,240,.55); color: #b7ecff; }
+
+  /* ---------- 图例 / 提示 ---------- */
+  #legend {
+    position: fixed; left: 28px; top: 96px; display: flex; flex-direction: column; gap: 8px;
+    font-size: 12px; color: var(--muted); z-index: 5; pointer-events: none;
+  }
+  .lg { display: flex; align-items: center; gap: 9px; }
+  .lg::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; box-shadow: 0 0 12px currentColor; }
+  .lg.algebra { color: var(--algebra); }
+  .lg.trig { color: var(--trig); }
+  .lg.geometry { color: var(--geometry); }
+  .lg.stat { color: var(--stat); }
+
+  #axis-hint {
+    position: fixed; right: 28px; bottom: 74px; display: flex; flex-direction: column; gap: 6px;
+    align-items: flex-end; font-size: 11px; color: #6f88ad; z-index: 5; pointer-events: none;
+  }
+  .ax { padding: 4px 10px; border-radius: 8px; background: rgba(255,255,255,.035); border: 1px solid rgba(120,170,230,.13); }
+
+  #hint {
+    position: fixed; left: 50%; transform: translateX(-50%); bottom: 20px;
+    font-size: 12px; color: #8fa6c9; letter-spacing: .3px; z-index: 5; pointer-events: none;
+    padding: 6px 16px; border-radius: 999px; background: rgba(6,14,26,.82);
+    border: 1px solid rgba(110,160,220,.14);
+  }
+  #hint b { color: #d8ecff; }
+
+  /* ---------- 侧面板 ---------- */
+  #quiz {
+    position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 560px; max-width: 92vw; max-height: 86vh; overflow-y: auto; z-index: 40;
+    padding: 20px 22px 24px; border-radius: 18px; display: none;
+    background: linear-gradient(180deg, rgba(9,20,36,.97), rgba(6,13,24,.98));
+    border: 1px solid rgba(110,170,240,.28); box-shadow: 0 24px 70px rgba(0,0,0,.65);
+  }
+  #quiz.open { display: block; }
+  #quiz.dragging { transition: none; }
+  .quiz-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; cursor: move; user-select: none; touch-action: none; }
+  .quiz-head h3 { font-size: 15px; font-weight: 600; color: #cfe6ff; }
+  .quiz-drop {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    padding: 22px 14px; margin-bottom: 14px; cursor: pointer;
+    border: 1px dashed rgba(110,170,240,.34); border-radius: 14px;
+    background: rgba(20,40,70,.28); color: var(--muted); font-size: 13px; text-align: center;
+  }
+  .quiz-drop.over { border-color: rgba(40,200,255,.6); background: rgba(20,60,110,.4); }
+  .quiz-drop img { max-width: 100%; max-height: 240px; border-radius: 10px; }
+  .quiz-cfg { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .quiz-cfg input {
+    padding: 9px 12px; border-radius: 10px; font-size: 12.5px; color: #dceaff;
+    background: rgba(12,26,44,.9); border: 1px solid rgba(110,170,240,.22); outline: none;
+  }
+  .quiz-cfg input:focus { border-color: rgba(80,200,255,.55); }
+  .quiz-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  #quiz-out { margin-top: 14px; font-size: 13px; line-height: 1.65; color: #bcd6f0; white-space: pre-wrap; }
+  #quiz-out b { color: #8fe4ff; }
+  .drill-block { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(110,170,240,.2); }
+  #panel {
+    position: fixed; top: 0; right: 0; height: 100%; width: 360px; max-width: 92vw;
+    padding: 26px 22px 40px; z-index: 20;
+    background: linear-gradient(180deg, rgba(8,18,32,.80), rgba(6,12,22,.90));
+    backdrop-filter: blur(9px) saturate(1.15);
+    border-left: 1px solid rgba(110,170,240,.18);
+    box-shadow: -24px 0 60px rgba(0,0,0,.45);
+    transform: translateX(0);
+    overflow-y: auto;
+    display: none;
+    contain: layout paint;
+  }
+  #panel.open { display: block; }
+  #panel-close {
+    position: absolute; top: 16px; right: 18px; width: 30px; height: 30px;
+    border-radius: 50%; border: 1px solid rgba(140,190,240,.25); background: rgba(255,255,255,.05);
+    color: #a9c3e6; font-size: 17px; line-height: 1; cursor: pointer;
+  }
+  #panel-close:hover { background: rgba(255,90,120,.18); color: #ffd6de; }
+  #panel-title {
+    font-size: 20px; font-weight: 650; letter-spacing: .3px; color: #eef6ff;
+    padding-right: 40px; line-height: 1.35;
+  }
+  #panel-title .cno {
+    font-size: 12px; font-weight: 600; color: #7fd0ff; letter-spacing: .6px;
+    background: rgba(53,199,240,.14); border: 1px solid rgba(53,199,240,.35);
+    padding: 3px 8px; border-radius: 6px; margin-right: 8px; vertical-align: 3px;
+  }
+  #panel-meta { margin: 12px 0 4px; display: flex; flex-wrap: wrap; gap: 7px; }
+  .tag { font-size: 11px; padding: 3px 9px; border-radius: 999px; border: 1px solid currentColor; }
+  .tag.algebra { color: var(--algebra); background: rgba(53,199,240,.1); }
+  .tag.trig { color: var(--trig); background: rgba(167,139,250,.1); }
+  .tag.geometry { color: var(--geometry); background: rgba(245,154,38,.1); }
+  .tag.stat { color: var(--stat); background: rgba(52,211,153,.1); }
+  .chip {
+    font-size: 11px; padding: 3px 9px; border-radius: 999px;
+    background: rgba(255,255,255,.05); border: 1px solid rgba(140,185,240,.18); color: #9fb6d4;
+  }
+
+  .sections { list-style: none; padding: 0; margin: 16px 0 0; }
+  .sections li {
+    padding: 11px 13px; margin-bottom: 8px; border-radius: 11px;
+    background: rgba(255,255,255,.032); border: 1px solid rgba(120,170,230,.1);
+  }
+  .shead { font-size: 13.5px; color: #deebff; }
+  .shead b { color: #6fc4f5; font-weight: 600; margin-right: 6px; font-variant-numeric: tabular-nums; }
+  .pts { margin-top: 7px; display: flex; flex-wrap: wrap; gap: 5px; }
+  .pts span {
+    font-size: 11px; padding: 2px 8px; border-radius: 6px; color: #8fa9c8;
+    background: rgba(120,170,230,.08);
+  }
+  .practice {
+    margin-top: 12px; font-size: 12px; color: #9fe0c4; padding: 9px 12px; border-radius: 9px;
+    background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.2);
+  }
+  .rel { margin-top: 18px; }
+  .rel h4 {
+    font-size: 11px; letter-spacing: 1px; color: #6f88ad; margin: 0 0 8px; font-weight: 600;
+  }
+  .relink {
+    display: block; font-size: 12.5px; color: #a9d6ff; cursor: pointer; padding: 6px 10px;
+    border-radius: 8px; margin-bottom: 5px; background: rgba(90,160,240,.07);
+    border: 1px solid rgba(90,160,240,.16); transition: .16s;
+  }
+  .relink:hover { background: rgba(90,160,240,.17); border-color: rgba(90,160,240,.4); color: #d8efff; }
+
+  /* ---------- 底部时间轴 ---------- */
+  #timeline {
+    position: fixed; left: 50%; transform: translateX(-50%); bottom: 58px;
+    display: flex; flex-wrap: nowrap; justify-content: center; gap: 3px; z-index: 6;
+    padding: 6px 10px; border-radius: 16px; max-width: 96vw; overflow-x: auto;
+    background: rgba(6,14,26,.86); border: 1px solid rgba(110,160,220,.14);
+  }
+  .tl-item.primary { border-color: rgba(60,160,150,.35); background: rgba(40,120,120,.10); }
+  .tl-item.junior { border-color: rgba(90,160,240,.32); background: rgba(40,90,150,.10); }
+  .tl-item.primary b { color: #8fe3d0; }
+  .tl-item.junior b { color: #7fd0ff; }
+  .tl-item {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+    padding: 7px 13px; border-radius: 10px; cursor: pointer;
+    background: transparent; border: 1px solid transparent; color: inherit; font-family: inherit;
+    transition: .18s;
+  }
+  .tl-item .bar {
+    position: absolute; left: 5px; bottom: 3px; height: 2px; width: 0%;
+    background: #ffd070; border-radius: 2px; opacity: 0; transition: .25s;
+  }
+  .tl-item b { font-size: 12px; color: #bfdcf8; font-weight: 600; letter-spacing: .2px; white-space: nowrap; }
+  .tl-item i { font-size: 9px; color: #62799c; font-style: normal; letter-spacing: .5px; }
+  .tl-item:hover { background: rgba(90,160,240,.14); border-color: rgba(90,160,240,.34); }
+  .tl-item:hover b { color: #e6f4ff; }
+
+  #soft-tip {
+    position: fixed; left: 50%; transform: translateX(-50%); top: 74px;
+    max-width: 760px; padding: 9px 16px; border-radius: 10px; z-index: 8;
+    font-size: 12px; line-height: 1.6; color: #ffe6a8;
+    background: rgba(90,60,10,.72); border: 1px solid rgba(255,200,90,.35);
+  }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-thumb { background: rgba(120,170,230,.25); border-radius: 8px; }
+
+  @media (max-width: 1180px) {
+    #timeline { display: none; }
+  }
+  @media (max-width: 720px) {
+    .brand h1 { font-size: 15px; }
+    .brand p { font-size: 10.5px; }
+    #legend, #axis-hint { display: none; }
+    #quiz {
+    position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 560px; max-width: 92vw; max-height: 86vh; overflow-y: auto; z-index: 40;
+    padding: 20px 22px 24px; border-radius: 18px; display: none;
+    background: linear-gradient(180deg, rgba(9,20,36,.97), rgba(6,13,24,.98));
+    border: 1px solid rgba(110,170,240,.28); box-shadow: 0 24px 70px rgba(0,0,0,.65);
+  }
+  #quiz.open { display: block; }
+  #quiz.dragging { transition: none; }
+  .quiz-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; cursor: move; user-select: none; touch-action: none; }
+  .quiz-head h3 { font-size: 15px; font-weight: 600; color: #cfe6ff; }
+  .quiz-drop {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    padding: 22px 14px; margin-bottom: 14px; cursor: pointer;
+    border: 1px dashed rgba(110,170,240,.34); border-radius: 14px;
+    background: rgba(20,40,70,.28); color: var(--muted); font-size: 13px; text-align: center;
+  }
+  .quiz-drop.over { border-color: rgba(40,200,255,.6); background: rgba(20,60,110,.4); }
+  .quiz-drop img { max-width: 100%; max-height: 240px; border-radius: 10px; }
+  .quiz-cfg { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .quiz-cfg input {
+    padding: 9px 12px; border-radius: 10px; font-size: 12.5px; color: #dceaff;
+    background: rgba(12,26,44,.9); border: 1px solid rgba(110,170,240,.22); outline: none;
+  }
+  .quiz-cfg input:focus { border-color: rgba(80,200,255,.55); }
+  .quiz-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  #quiz-out { margin-top: 14px; font-size: 13px; line-height: 1.65; color: #bcd6f0; white-space: pre-wrap; }
+  #quiz-out b { color: #8fe4ff; }
+  .drill-block { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(110,170,240,.2); }
+  #panel { width: 100%; max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+  <div id="label-layer"></div>
+
+<header id="hud">
+  <div class="brand">
+    <span class="dot"></span>
+    <div>
+      <h1>上海数学 · 知识点图谱（小学 → 初中）</h1>
+      <p><b>一列 = 一册书</b>，从上往下就是这册先学什么、后学什么 · 沪教版 · 小学 1-5 年级 + 初中 18 册 · 82 章</p>
+    </div>
+  </div>
+  <div class="right">
+    <span id="gl-tag" class="pill">初始化…</span>
+    <span id="fps" class="pill">— fps</span>
+    <span id="beat" class="pill">帧 0</span>
+    <button id="btn-quiz" class="btn">📷 题目识别</button>
+    <button id="btn-labels" class="btn">标签：全名</button>
+    <button id="btn-spin" class="btn">自动旋转</button>
+    <span class="seg" id="stage-seg">
+      <button data-v="primary">小学</button>
+      <button data-v="junior">初中</button>
+      <button data-v="all" class="on">全部</button>
+    </span>
+    <button id="btn-reset" class="btn">重置视角</button>
+  </div>
+</header>
+
+<div id="legend">
+  <div id="progress">已掌握 0 / 82</div>
+  <span class="lg algebra">数与代数</span>
+  <span class="lg trig">三角</span>
+  <span class="lg geometry">图形与几何</span>
+  <span class="lg stat">统计与概率</span>
+</div>
+
+
+
+<div id="timeline"></div>
+
+<div id="hint">点一个圆点，看看这一章学什么、之前学过什么</div>
+
+<div id="quiz">
+  <div class="quiz-head">
+    <h3>题目识别 · 上传题图，自动定位知识点</h3>
+    <button id="quiz-close" class="btn">×</button>
+  </div>
+  <label class="quiz-drop" id="quiz-drop">
+    <input type="file" id="quiz-file" accept="image/*" hidden>
+    <img id="quiz-prev" alt="" hidden>
+    <span id="quiz-drop-text">点这里选题目图片，或把图片拖进来</span>
+  </label>
+  <div class="quiz-cfg">
+    <input id="quiz-api" placeholder="API 地址，如 https://api.openai.com/v1">
+    <input id="quiz-key" type="password" placeholder="API Key（本地服务可不填）">
+    <input id="quiz-model" placeholder="模型名，如 gpt-4o / qwen-vl-max">
+  </div>
+  <div class="quiz-actions">
+    <button id="quiz-run" class="btn">开始分析</button>
+    <button id="quiz-locate" class="btn" hidden>📍 在图谱中定位</button>
+    <button id="quiz-drill" class="btn" hidden>📝 出同类题</button>
+    <button id="quiz-again" class="btn" hidden>换个题目</button>
+  </div>
+  <div id="quiz-out"></div>
+</div>
+<aside id="panel">
+  <button id="panel-close">×</button>
+  <div id="panel-title"></div>
+  <div id="panel-meta"></div>
+  <div id="panel-body"></div>
+</aside>
+
+<script type="text/plain" id="three-core">__THREE_CORE__</script>
+<script type="text/plain" id="three-module">__THREE_MODULE__</script>
+<script type="application/json" id="graph-data">__DATA__</script>
+<script type="module">
+__SCENE__
+</script>
+</body>
+</html>
