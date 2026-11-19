@@ -1,3 +1,7 @@
+/* 上海数学 · 知识点图谱 3D —— 场景与交互
+ * 作者：霜枫燃 · 2026
+ * 单文件构建；此处为源码，成品见仓库根目录的同名 HTML。
+ */
 /* ============================================================
    上海初中数学知识图谱 · three.js r187 + WebGL2
    数据：沪教版（五四制）2024 版新教材 33 章 104 节
@@ -1223,3 +1227,9 @@ window.addEventListener('resize', () => {
 if (location.search.includes('debug')) document.body.classList.add('debug');
 
 tick();
+
+/* ---------- 署名彩蛋：打开控制台能看到 ---------- */
+console.log('%c上海数学 · 知识点图谱 3D%c  作者：霜枫燃 · 2026 · MIT',
+  'font-size:15px;font-weight:700;color:#7fd4ff', 'font-size:12px;color:#8aa3bd');
+console.log('%c沪教版小学 1-5 年级 + 初中 18 册 · 82 章 · 52 条承接关系',
+  'font-size:12px;color:#8aa3bd');

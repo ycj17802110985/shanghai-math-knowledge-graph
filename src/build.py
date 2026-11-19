@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""把 three.js 源码 + 数据 + 场景代码拼成一个自包含 HTML。"""
+"""把 three.js 源码 + 数据 + 场景代码拼成一个自包含 HTML。
+
+作者：霜枫燃 · 2026
+"""
 import json, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent   # 仓库根目录
